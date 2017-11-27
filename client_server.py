@@ -174,6 +174,22 @@ def send_turn():
 
     return ret_val
 
+
+# route invoked by interface to end turn
+@app.route("/end_turn")
+def end_turn():
+    payload = {
+        'identifier': client_identifier
+    }
+
+    res = rq.post(game_server + "end_turn", data=json.dumps(payload), 
+                  headers=json_headers)
+
+    res = json.loads(res.text)
+
+    return jsonify(res)
+
+
 if __name__ == '__main__':
     # send request to game server to join
     data = {
