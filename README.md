@@ -20,8 +20,7 @@ Instead of introducing the complexity of a persistent socket connection and deal
         - sends notifications to all clients
     - SEND TURN
         - initiated from interface, sent through client server
-    - GET CURRENT GAME state
-        - 
+    - GET CURRENT GAME state 
     - QUIT
         - delete all game state
 

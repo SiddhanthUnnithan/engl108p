@@ -39,7 +39,7 @@ card_deck = sum([[val]*4 for val in card_order], [])
 def join_game():
     if close_game['status']:
         ret_val = {
-            'game_status': 'closed'
+            'message': 'Game is closed. Check with guardian about next round.'
         }
 
         return jsonify(ret_val)
@@ -55,24 +55,26 @@ def join_game():
     cq.enq(client_id)
 
     ret_val = {
-        'game_status': 'open'
+        'message': 'Successfully joined game. Status: OPEN.'
     }
 
-    rq.post("http://%s:5000/io_route" % client_id, data=json.dumps(ret_val), 
-            headers=json_header)
-
-    return True
+    return jsonify(ret_val)
 
 
 @app.route("/all_clients", method=['POST'])
 def all_clients():
     close_game['status'] = True
 
-    # shuffle cards and send to all clients
+    # send game open message to all clients
     game_open_msg = {
         'message': 'All clients joined. Please await guardian instructions.'
     }
+    
+    for client_id in valid_clients:
+        rq.post("http://%s:8080/io_route" % client_id, 
+                data=json.dumps(game_open_msg), headers=json_header)
 
+    # shuffle cards and send to all clients
     cd = card_deck
 
     shuffle(cd)
@@ -97,7 +99,7 @@ def all_clients():
 
     for client in allocated_cards:
         hand_send['hand'] = allocated_cards[client]
-        rq.post("http://%s:5000/post_hand" % client, data=json.dumps(hand_send),
+        rq.post("http://%s:8080/post_hand" % client, data=json.dumps(hand_send),
                 headers=json_header)
 
     # shuffle clients and create turn-order
@@ -109,3 +111,8 @@ def all_clients():
         cq.enq(client)
 
     return True
+
+
+if __name__ == '__main__':
+    # instantiate app server
+    app.run(host="0.0.0.0", port=8080, debug=True)
