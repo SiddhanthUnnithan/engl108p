@@ -5,6 +5,7 @@ import json
 import commands
 import os
 import random
+import logging
 
 from flask import Flask, jsonify, request
 import requests as rq
@@ -14,6 +15,10 @@ from utils.client import should_explode
 import pdb
 
 app = Flask(__name__)
+
+# logging config
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # assumption: all clients are going to be instantiated on OSX machines
 if 'DEV_FLAG' in os.environ:
