@@ -38,10 +38,23 @@ def should_explode(num_cards=None):
 
     if num_cards is None:
         return ri >= explosion_threshold
+    elif num_cards == 0:
+        # can't explode with no cards in hand
+        return False
 
     # randomly determine which card should explode
-    explode_idx = random.randint(0, num_cards)
+    explode_idx = random.randint(0, num_cards-1)
     return (ri >= explosion_threshold, explode_idx)
+
+
+def io_print(data, ignore=[]):
+    for key, val in data.iteritems():
+        if key in ignore:
+            continue
+
+        print "\n"
+        print "%s : %s" % (key.upper(), val)
+        print "\n"
 
 
 if __name__ == '__main__':

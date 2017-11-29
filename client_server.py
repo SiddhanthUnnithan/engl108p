@@ -4,15 +4,12 @@
 import json
 import commands
 import os
-import random
 import logging
 
 from flask import Flask, jsonify, request
 import requests as rq
 
-from utils.client import should_explode
-
-import pdb
+from utils.client import should_explode, io_print
 
 app = Flask(__name__)
 
@@ -45,10 +42,7 @@ json_headers = {
 def io_route():
     data = request.get_json()
 
-    for key, val in data.iteritems():
-        print "\n"
-        print "%s : %s" % (key.upper(), val)
-        print "\n"
+    io_print(data)
 
     return jsonify({'success': True})
 
@@ -72,18 +66,22 @@ def get_hand():
     if hand is not None:
         explode_flag, card_idx = should_explode(len(hand['hand']))
 
-        if not explode_flag:
-            # don't explode
-            return jsonify(ret_val)
+        if explode_flag:
+            # randomly determine which card should explode
+            exploded_card = hand['hand'].pop(card_idx)
 
-        # randomly determine which card should explode
-        exploded_card = hand['hand'].pop(card_idx)
+            ret_val['message'] = \
+                'Oh no - %s exploded from your hand!' % exploded_card
 
-        ret_val['message'] = \
-            'Oh no - %s exploded from your hand!' % exploded_card
-
-        ret_val['hand'] = hand['hand']
+            ret_val['hand'] = hand['hand']
     
+    # log to client server
+    print "\t".join([str(idx+1) for idx in range(0, len(hand['hand']))])
+
+    print "\n"
+
+    print "\t".join([val for val in hand['hand']])
+
     return jsonify(ret_val)
 
 
@@ -107,8 +105,9 @@ def send_turn():
 
     # received data is index of card to be played, or pass message
     card_idx = data['card_index']
+    card_idx = card_idx-1
 
-    if isisntance(card_idx, str) and card_idx == 'pass':
+    if isinstance(card_idx, str) and card_idx == 'pass':
         # invoke end of turn
         res = rq.post(game_server + "end_turn", data=json.dumps(payload), 
                       headers=json_headers)
@@ -118,14 +117,14 @@ def send_turn():
         ret_val['success'] = res['success']
         ret_val['message'] = res['message']
 
-        return ret_val
+        return jsonify(ret_val)
 
 
     if card_idx < 0 or card_idx >= len(hand['hand']):
         ret_val['success'] = False
         ret_val['message'] = 'Invalid card specified. Please try again'
 
-        return ret_val
+        return jsonify(ret_val)
 
     # chance that card explodes when it is attempted to play
     explode_flag = should_explode()
@@ -149,7 +148,9 @@ def send_turn():
             ret_val['success'] = res['success']
             ret_val['message'] = res['message']
 
-        return ret_val
+        io_print(ret_val, ignore=['success', 'retry'])
+
+        return jsonify(ret_val)
 
     card = hand['hand'][card_idx]
 
@@ -167,7 +168,7 @@ def send_turn():
         ret_val['message'] = res['message']
         ret_val['retry'] = res['retry']
 
-        return ret_val
+        return jsonify(ret_val)
 
     # successful - turn ending handled on game server side
     # possible that a retry is initiated - done on game server
@@ -177,7 +178,10 @@ def send_turn():
     ret_val['success'] = True
     ret_val['message'] = res['message']
 
-    return ret_val
+    # log message to current client
+    io_print(ret_val, ignore=['success', 'retry'])
+
+    return jsonify(ret_val)
 
 
 # route invoked by interface to end turn
@@ -191,6 +195,8 @@ def end_turn():
                   headers=json_headers)
 
     res = json.loads(res.text)
+
+    io_print(res, ignore=['success'])
 
     return jsonify(res)
 

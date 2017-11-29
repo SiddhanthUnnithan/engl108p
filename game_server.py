@@ -10,8 +10,6 @@ import requests as rq
 
 from utils.client import ClientQueue, should_explode
 
-import pdb
-
 # app instance
 app = Flask(__name__)
 
@@ -174,6 +172,19 @@ def send_turn():
             rq.post("http://%s:8080/io_route" % client, 
                     data=json.dumps(broadcast), headers=json_header)
 
+        # end current clients turn via dequeue
+        cq.dq()
+
+        # send message to next client
+        next_client = cq.peek()
+
+        payload = {
+            'message': 'It is your turn.'
+        }
+
+        rq.post("http://%s:8080/io_route" % next_client, 
+                data=json.dumps(payload), headers=json_header)
+
         return jsonify(ret_val)
 
     prev_card_idx = card_order.index(game_state['recently_played'])
@@ -184,9 +195,8 @@ def send_turn():
         ret_val['success'] = False
         ret_val['message'] = 'Invalid card played. Prompting a retry.'
         ret_val['retry'] = True
-
     # valid card chosen - burn invoked
-    if played_card == game_state['recently_played']:
+    elif played_card == game_state['recently_played']:
         # broadcast played card
         broadcast = {
             'message': '{client} played a {card} and invoked a Horntail burn.'
@@ -209,7 +219,8 @@ def send_turn():
         # prompt a retry via a message
         ret_val['success'] = True
         ret_val['message'] = \
-            'Valid card played, and burn invoked. Please go again.'
+            'Valid card played, and burn invoked. It is your turn again.'
+        ret_val['retry'] = True
     else:
         # broadcast played card
         broadcast = {
@@ -230,6 +241,11 @@ def send_turn():
         ret_val['success'] = True
         ret_val['message'] = 'Valid card played. Your turn has ended.'
 
+        # alter game state
+        game_state['recently_played'] = played_card
+
+    # if a retry is required, we don't broadcast to client - causes block
+    if not ret_val['retry']:
         # send message to next client
         next_client = cq.peek()
 
@@ -241,7 +257,6 @@ def send_turn():
                 data=json.dumps(payload), headers=json_header)
 
     return jsonify(ret_val)
-
 
 
 # route invoked by client server to end current client turn - explosion
@@ -263,11 +278,11 @@ def end_turn():
 
         return jsonify(ret_val)
 
-    # push client to end of queue
-    cq.dq()
-
     ret_val['success'] = True
     ret_val['message'] = 'Turn ended.'
+
+    # push client to end of queue
+    cq.dq()
 
     # make I/O request to next client
     client_id = cq.peek()
@@ -280,6 +295,31 @@ def end_turn():
             headers=json_header)
 
     return jsonify(ret_val)
+
+@app.route("/broadcast_message", methods=['POST'])
+def broadcast_message():
+    payload = {
+        'message': None
+    }
+
+    # obtain a message to be broadcasted to all clients
+    data = request.get_json()
+
+    # ignore who is sending the broadcast - invoked by 'private' methods
+    # so this is acceptable
+    client_id = data['identifier']
+
+    payload['message'] = data['message']
+
+    for client in valid_clients:
+        if client == client_id:
+            continue
+
+        rq.post("http:%s:8080/io_route" % client, data=json.dumps(payload),
+                headers=json_header)
+
+    return jsonify(payload)
+
 
 if __name__ == '__main__':
     # instantiate app server
