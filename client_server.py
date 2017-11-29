@@ -10,6 +10,9 @@ from flask import Flask, jsonify, request
 import requests as rq
 
 from utils.client import should_explode, io_print
+from Card import Card
+
+import pdb
 
 app = Flask(__name__)
 
@@ -51,7 +54,18 @@ def io_route():
 @app.route("/post_hand", methods=['POST'])
 def post_hand():
     data = request.get_json()
-    hand['hand'] = data['hand']
+
+    player_hand = data['hand']
+
+    # generate ascii hand
+    ascii_hand = []
+
+    for card, suit in player_hand:
+        c = Card(suit, card)
+        ascii_hand.append((card, Card.get_ascii_front(c)))
+
+    hand['hand'] = ascii_hand
+
     return jsonify({'success': True})
 
 
@@ -68,7 +82,7 @@ def get_hand():
 
         if explode_flag:
             # randomly determine which card should explode
-            exploded_card = hand['hand'].pop(card_idx)
+            exploded_card = hand['hand'].pop(card_idx)[0]
 
             ret_val['message'] = \
                 'Oh no - %s exploded from your hand!' % exploded_card
@@ -76,11 +90,44 @@ def get_hand():
             ret_val['hand'] = hand['hand']
     
     # log to client server
-    print "\t".join([str(idx+1) for idx in range(0, len(hand['hand']))])
+    io_print(ret_val, ignore=['hand'])
 
-    print "\n"
+    # print ascii cards
 
-    print "\t".join([val for val in hand['hand']])
+    # might have to split hand for outputting purposes
+    card_segments = [[]]
+    index_segments = [[]]
+    curr_idx = 0
+    ascii_hand = [tup[1] for tup in hand['hand']]
+
+    for idx, cobj in enumerate(ascii_hand):
+        if len(card_segments[curr_idx]) == 5:
+            # we've reached max number of cards per row
+            card_segments.append([])
+            index_segments.append([])
+            curr_idx += 1
+
+        card_segments[curr_idx].append(cobj)
+        index_segments[curr_idx].append(idx)
+
+
+    for idx, arr in enumerate(card_segments):
+        spaces = " "*22
+        print spaces.join([str(i+1) for i in index_segments[idx]])
+
+        ascii_cards = []
+
+        for card in arr:
+            if len(ascii_cards) == 0:
+                # generate n sub-arrays
+                ascii_cards = [[] for ln in card]
+
+            for idx, val in enumerate(card):
+                ascii_cards[idx].append(val)
+
+        for arr in ascii_cards:
+            b = " ".join(["%s" for elem in arr])
+            print b % tuple(arr)
 
     return jsonify(ret_val)
 
@@ -135,7 +182,7 @@ def send_turn():
         ret_val['success'] = True
         ret_val['message'] = \
             'Oh no - %s exploded from your hand! Your turn is done.' \
-                % exploded_card
+                % exploded_card[0]
 
         # invoke end of turn
         res = rq.post(game_server + "end_turn", data=json.dumps(payload), 
@@ -152,7 +199,7 @@ def send_turn():
 
         return jsonify(ret_val)
 
-    card = hand['hand'][card_idx]
+    card = hand['hand'][card_idx][0]
 
     # hold onto card in case of invalid move
     payload['card'] = card
@@ -192,6 +239,23 @@ def end_turn():
     }
 
     res = rq.post(game_server + "end_turn", data=json.dumps(payload), 
+                  headers=json_headers)
+
+    res = json.loads(res.text)
+
+    io_print(res, ignore=['success'])
+
+    return jsonify(res)
+
+
+# route invoked by interface to end game - propagated to game server
+@app.route("/end_game")
+def end_game():
+    payload = {
+        'identifier': client_identifier
+    }
+
+    res = rq.post(game_server + "end_game", data=json.dumps(payload),
                   headers=json_headers)
 
     res = json.loads(res.text)

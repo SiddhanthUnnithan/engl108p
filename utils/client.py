@@ -40,7 +40,7 @@ def should_explode(num_cards=None):
         return ri >= explosion_threshold
     elif num_cards == 0:
         # can't explode with no cards in hand
-        return False
+        return False, None
 
     # randomly determine which card should explode
     explode_idx = random.randint(0, num_cards-1)

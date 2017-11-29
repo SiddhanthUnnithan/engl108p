@@ -9,6 +9,7 @@ from flask import Flask, jsonify, request
 import requests as rq
 
 from utils.client import ClientQueue, should_explode
+from Card import Suits
 
 # app instance
 app = Flask(__name__)
@@ -33,7 +34,12 @@ json_header = {
 }
 
 card_order = [str(num) for num in range(3,11)] + ['J', 'Q', 'K', 'A', '2']
-card_deck = sum([[val]*4 for val in card_order], [])
+
+# testing
+# card_order = card_order[:3]
+
+suits = [Suits.DIAMONDS, Suits.SPADES, Suits.CLUBS, Suits.HEARTS]
+card_deck = sum([zip([val]*4, suits) for val in card_order], [])
 
 
 # route invoked by client to join the game
@@ -295,6 +301,54 @@ def end_turn():
             headers=json_header)
 
     return jsonify(ret_val)
+
+
+@app.route("/end_game", methods=['POST'])
+def end_game():
+    ret_val = {
+        'success': False,
+        'message': None
+    }
+
+    payload = {
+        'message': None
+    }
+
+    data = request.get_json()
+
+    # check that client invoking is the one with the turn
+    if data['identifier'] != cq.peek():
+        ret_val['message'] = \
+            "It is not your turn. Please await a message to play."
+
+        return jsonify(ret_val)
+
+    # remove client from queue
+    cq.dq(quit=True)
+
+    ret_val['success'] = True
+
+    ret_val['message'] = 'Congratulations on finishing! See you soon.'
+
+    # broadcast message to all clients
+    payload['message'] = '%s has finished the game.' % data['identifier']
+
+    for client in valid_clients:
+        if client == data['identifier']:
+            continue
+
+        rq.post("http://%s:8080/io_route" % client, 
+                data=json.dumps(payload), headers=json_header)
+
+
+    # send message to next client
+    payload['message'] = 'It is your turn.'
+
+    rq.post("http://%s:8080/io_route" % cq.peek(), data=json.dumps(payload),
+            headers=json_header)
+
+    return jsonify(ret_val)
+
 
 @app.route("/broadcast_message", methods=['POST'])
 def broadcast_message():
