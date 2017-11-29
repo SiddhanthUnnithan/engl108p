@@ -6,7 +6,7 @@ import json
 
 import requests as rq
 
-def main(client_id, card_idx):
+def main(card_idx):
     url = "http://localhost:8080/send_turn"
 
     data = {
@@ -23,7 +23,6 @@ def main(client_id, card_idx):
 
 
 if __name__ == '__main__':
-    client_id = sys.argv[1]
-    card_idx = sys.argv[2]
+    card_idx = sys.argv[1]
 
-    main(client_id, card_idx)
+    main(card_idx)

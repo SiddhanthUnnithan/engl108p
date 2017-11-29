@@ -350,6 +350,15 @@ def end_game():
     return jsonify(ret_val)
 
 
+@app.route("/last_played")
+def last_played():
+    payload = {
+        'card': game_state['recently_played']
+    }
+
+    return jsonify(payload)
+
+
 @app.route("/broadcast_message", methods=['POST'])
 def broadcast_message():
     payload = {

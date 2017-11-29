@@ -10,7 +10,7 @@ from flask import Flask, jsonify, request
 import requests as rq
 
 from utils.client import should_explode, io_print
-from Card import Card
+from Card import Card, Suits
 
 import pdb
 
@@ -231,6 +231,31 @@ def send_turn():
     return jsonify(ret_val)
 
 
+# route invoked by interface to retrieve the last played card
+@app.route("/last_played")
+def last_played():
+    payload = {
+        'message': None
+    }
+
+    res = rq.get(game_server + "last_played")
+
+    res = json.loads(res.text)
+
+    if res['card'] is None:
+        payload['message'] = 'No card in game state. You may play any card.'
+    else:
+        # create default suit - spade (currently not keeping track of suit)
+        payload['message'] = \
+            "\n".join(Card.get_ascii_front(Card(Suits.SPADES, str(res['card']))))
+
+    print "Last played card:\n"
+
+    io_print(payload, card=True)
+
+    return jsonify(payload)
+
+
 # route invoked by interface to end turn
 @app.route("/end_turn")
 def end_turn():
@@ -255,10 +280,15 @@ def end_game():
         'identifier': client_identifier
     }
 
-    res = rq.post(game_server + "end_game", data=json.dumps(payload),
-                  headers=json_headers)
+    if len(hand['hand']) == 0:
+        res = rq.post(game_server + "end_game", data=json.dumps(payload),
+                      headers=json_headers)
 
-    res = json.loads(res.text)
+        res = json.loads(res.text)
+    else:
+        res = {
+            'message': 'You cannot end the game if you have cards remaining.'
+        }
 
     io_print(res, ignore=['success'])
 

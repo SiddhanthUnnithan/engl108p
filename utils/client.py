@@ -47,13 +47,18 @@ def should_explode(num_cards=None):
     return (ri >= explosion_threshold, explode_idx)
 
 
-def io_print(data, ignore=[]):
+def io_print(data, ignore=[], card=False):
     for key, val in data.iteritems():
         if key in ignore:
             continue
 
         print "\n"
-        print "%s : %s" % (key.upper(), val)
+
+        if not card:
+            print "%s : %s" % (key.upper(), val)
+        else:
+            print val
+        
         print "\n"
 
 
