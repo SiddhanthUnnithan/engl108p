@@ -32,12 +32,12 @@ class Card(object):
             return ''
 
     @staticmethod
-    def print_ascii_front(card):
+    def get_ascii_front(card):
         # Generate top, blank middle and bottom rows
         top = unichr(0x250C)
         bottom = unichr(0x2514)
-        empty_mid = left = suit_left = middle = right = suit_right = unichr(0x2502)
-        for i in range(0, 15):
+        empty_mid = left = suit_left = middle = face = twomid = right = suit_right = unichr(0x2502)
+        for i in range(0, 19):
             top += unichr(0x2500)
             bottom += unichr(0x2500)
             empty_mid += u' '
@@ -45,25 +45,41 @@ class Card(object):
         bottom += unichr(0x2518)
         empty_mid += unichr(0x2502)
 
-        # Generate card=specific lines
+        # Generate Single Middle and Face Cards
+        for i in range(0, 9):
+            middle += u' '
+            face += u' '
+        middle += u'{}'.format(card.suit)
+        face += u'{}'.format(card.number)
+        for i in range(0, 9):
+            middle += u' '
+            face += u' '
+        middle += unichr(0x2502)
+        face += unichr(0x2502)
+
+        # Generate Double Middle Symbol
+        twomid += u'  '
+        twomid += u'{}'.format(card.suit)
+        for i in range(0, 13):
+            twomid += u' '
+        twomid += u'{}'.format(card.suit)
+        twomid += u'  '
+        twomid += unichr(0x2502)
+
+        # Generate card-specific lines
         left += u'{}'.format(card.number)
         suit_left += u'{}'.format(card.suit)
-        for i in range(0, 7):
-            middle += u' '
-        middle += u'{}'.format(card.suit)
-        for i in range(0, 7):
-            middle += u' '
 
         if card.number == '10':
-            for i in range(0, 13):
+            for i in range(0, 17):
                 left += u' '
                 right += u' '
         else:
-            for i in range(0, 14):
+            for i in range(0, 18):
                 left += u' '
                 right += u' '
 
-        for i in range(0, 14):
+        for i in range(0, 18):
             suit_left += u' '
             suit_right += u' '
 
@@ -73,22 +89,87 @@ class Card(object):
         right += unichr(0x2502)
         suit_left += unichr(0x2502)
         suit_right += unichr(0x2502)
-        middle += unichr(0x2502)
 
-        lines = [top, left, suit_left, middle, suit_right, right, bottom]
-        for i in range(0, 3):
+        lines = [top, left, suit_left, suit_right, right, bottom]
+        if card.number in ['J', 'Q', 'K', 'A']:
+            if card.number == 'A':
+                lines.insert(3, middle)
+            else:
+                lines.insert(3, face)
+            for i in range(0, 4):
+                lines.insert(3, empty_mid)
+                lines.insert(len(lines) - 3, empty_mid)
+        elif card.number == '2':
+            lines.insert(3, middle)
+            for i in range(0, 7):
+                lines.insert(3, empty_mid)
+            lines.insert(3, middle)
+        elif card.number == '3':
             lines.insert(3, empty_mid)
+            lines.insert(4, middle)
+            for i in range(0, 2):
+                lines.insert(5, middle)
+                lines.insert(5, empty_mid)
+                lines.insert(5, empty_mid)
             lines.insert(len(lines) - 3, empty_mid)
-        for l in lines:
-            print l
+        elif card.number == '4':
+            lines.insert(3, twomid)
+            for i in range(0, 7):
+                lines.insert(4, empty_mid)
+            lines.insert(len(lines) - 3, twomid)
+        elif card.number == '5':
+            lines.insert(3, twomid)
+            lines.insert(3, middle)
+            lines.insert(3, twomid)
+            for i in range(0, 3):
+                lines.insert(4, empty_mid)
+                lines.insert(len(lines) - 4, empty_mid)
+        elif card.number == '6':
+            lines.insert(3, twomid)
+            for i in range(0, 2):
+                lines.insert(3, twomid)
+                lines.insert(4, empty_mid)
+                lines.insert(4, empty_mid)
+                lines.insert(4, empty_mid)
+        elif card.number == '7':
+            lines.insert(3, twomid)
+            lines.insert(4, empty_mid)
+            lines.insert(5, middle)
+            lines.insert(6, empty_mid)
+            lines.insert(7, twomid)
+            lines.insert(8, empty_mid)
+            lines.insert(8, empty_mid)
+            lines.insert(8, empty_mid)
+            lines.insert(len(lines) - 3, twomid)
+        elif card.number == '8':
+            lines.insert(3, twomid)
+            lines.insert(4, empty_mid)
+            lines.insert(5, middle)
+            lines.insert(6, empty_mid)
+            lines.insert(7, twomid)
+            lines.insert(8, empty_mid)
+            lines.insert(9, middle)
+            lines.insert(10, empty_mid)
+            lines.insert(11, twomid)
+        elif card.number == '9':
+            lines.insert(3, twomid)
+            lines.insert(4, empty_mid)
+            lines.insert(5, empty_mid)
+            lines.insert(6, twomid)
+            lines.insert(7, middle)
+            lines.insert(8, twomid)
+            lines.insert(9, empty_mid)
+            lines.insert(10, empty_mid)
+            lines.insert(11, twomid)
+        elif card.number == '10':
+            lines.insert(3, empty_mid)
+            lines.insert(4, twomid)
+            lines.insert(5, middle)
+            lines.insert(6, twomid)
+            lines.insert(7, empty_mid)
+            lines.insert(8, twomid)
+            lines.insert(9, middle)
+            lines.insert(10, twomid)
+            lines.insert(11, empty_mid)
 
-
-card = Card(Suits.HEARTS, '10')
-card2 = Card(Suits.CLUBS, '2')
-card3 = Card(Suits.DIAMONDS, 'A')
-card4 = Card(Suits.SPADES, 'K')
-
-Card.print_ascii_front(card)
-Card.print_ascii_front(card2)
-Card.print_ascii_front(card3)
-Card.print_ascii_front(card4)
+        return lines
