@@ -4,6 +4,7 @@ import random
 import cmd
 import sys
 import operator
+import time
 
 # Exploding Snap Rules:
 # Two cards shown at a time
@@ -38,9 +39,16 @@ explosion = """
                 `._###############_,'
                    `--..#####..--'      \n"""
 
-
+rules = """Exploding Snap Rules:
+# Two cards are shown at a time
+# Type y if the cards are pairs, or n if they aren't
+# You earn a point for every correct answer. But be careful, you lose a life if you're wrong!
+# Every time you get a point, you have less time to solve the next pair
+# The more lives you lose, the more likely the cards might explode!
+# The game's over when you lose all your lives or if the cards explode\n"""
 class ExplodingSnap(cmd.Cmd):
-    intro = exploding_snap_util.intro + "Press Enter or type start to Begin Playing\nType help or ? to list commands\n"
+    intro = exploding_snap_util.intro + "Press Enter or type start to Begin Playing\nType help or ? to list commands\n" \
+                                        "Type rules to find out how to play\n"
     prompt = '(exploding_snap) '
     # Player Initial Values
     lives = 3
@@ -79,6 +87,10 @@ class ExplodingSnap(cmd.Cmd):
         print("Thanks for playing!")
         return True
 
+    def do_rules(self, arg):
+        'Show the rules of the game'
+        print(rules)
+
     def reset(self):
         self.lives = 3
         self.sleep_time = 3
@@ -114,6 +126,8 @@ class ExplodingSnap(cmd.Cmd):
         self.insert_score()
         print "You're out of lives! That is, unless you've got some horcruxes."
         print "Your score: {}\nType start to play again. Type scores to see high scores!".format(self.score)
+        time.sleep(2)
+        print self.intro
 
     def raw_input_timed(self, card_1, card_2):
         rlist, _, _ = select([sys.stdin], [], [], self.sleep_time)
