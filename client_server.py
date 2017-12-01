@@ -62,7 +62,7 @@ def post_hand():
 
     for card, suit in player_hand:
         c = Card(suit, card)
-        ascii_hand.append((card, Card.get_ascii_front(c)))
+        ascii_hand.append((card, c.get_ascii_front()))
 
     hand['hand'] = ascii_hand
 
@@ -247,7 +247,7 @@ def last_played():
     else:
         # create default suit - spade (currently not keeping track of suit)
         payload['message'] = \
-            "\n".join(Card.get_ascii_front(Card(Suits.SPADES, str(res['card']))))
+            "\n".join(Card(Suits.SPADES, str(res['card'])).get_ascii_front())
 
     print "Last played card:\n"
 

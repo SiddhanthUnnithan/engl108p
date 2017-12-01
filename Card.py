@@ -31,8 +31,7 @@ class Card(object):
         else:
             return ''
 
-    @staticmethod
-    def get_ascii_front(card):
+    def get_ascii_front(self):
         # Generate top, blank middle and bottom rows
         top = unichr(0x250C)
         bottom = unichr(0x2514)
@@ -49,8 +48,8 @@ class Card(object):
         for i in range(0, 9):
             middle += u' '
             face += u' '
-        middle += u'{}'.format(card.suit)
-        face += u'{}'.format(card.number)
+        middle += u'{}'.format(self.suit)
+        face += u'{}'.format(self.number)
         for i in range(0, 9):
             middle += u' '
             face += u' '
@@ -59,18 +58,18 @@ class Card(object):
 
         # Generate Double Middle Symbol
         twomid += u'  '
-        twomid += u'{}'.format(card.suit)
+        twomid += u'{}'.format(self.suit)
         for i in range(0, 13):
             twomid += u' '
-        twomid += u'{}'.format(card.suit)
+        twomid += u'{}'.format(self.suit)
         twomid += u'  '
         twomid += unichr(0x2502)
 
         # Generate card-specific lines
-        left += u'{}'.format(card.number)
-        suit_left += u'{}'.format(card.suit)
+        left += u'{}'.format(self.number)
+        suit_left += u'{}'.format(self.suit)
 
-        if card.number == '10':
+        if self.number == '10':
             for i in range(0, 17):
                 left += u' '
                 right += u' '
@@ -83,28 +82,28 @@ class Card(object):
             suit_left += u' '
             suit_right += u' '
 
-        right += u'{}'.format(card.number)
-        suit_right += u'{}'.format(card.suit)
+        right += u'{}'.format(self.number)
+        suit_right += u'{}'.format(self.suit)
         left += unichr(0x2502)
         right += unichr(0x2502)
         suit_left += unichr(0x2502)
         suit_right += unichr(0x2502)
 
         lines = [top, left, suit_left, suit_right, right, bottom]
-        if card.number in ['J', 'Q', 'K', 'A']:
-            if card.number == 'A':
+        if self.number in ['J', 'Q', 'K', 'A']:
+            if self.number == 'A':
                 lines.insert(3, middle)
             else:
                 lines.insert(3, face)
             for i in range(0, 4):
                 lines.insert(3, empty_mid)
                 lines.insert(len(lines) - 3, empty_mid)
-        elif card.number == '2':
+        elif self.number == '2':
             lines.insert(3, middle)
             for i in range(0, 7):
                 lines.insert(3, empty_mid)
             lines.insert(3, middle)
-        elif card.number == '3':
+        elif self.number == '3':
             lines.insert(3, empty_mid)
             lines.insert(4, middle)
             for i in range(0, 2):
@@ -112,26 +111,26 @@ class Card(object):
                 lines.insert(5, empty_mid)
                 lines.insert(5, empty_mid)
             lines.insert(len(lines) - 3, empty_mid)
-        elif card.number == '4':
+        elif self.number == '4':
             lines.insert(3, twomid)
             for i in range(0, 7):
                 lines.insert(4, empty_mid)
             lines.insert(len(lines) - 3, twomid)
-        elif card.number == '5':
+        elif self.number == '5':
             lines.insert(3, twomid)
             lines.insert(3, middle)
             lines.insert(3, twomid)
             for i in range(0, 3):
                 lines.insert(4, empty_mid)
                 lines.insert(len(lines) - 4, empty_mid)
-        elif card.number == '6':
+        elif self.number == '6':
             lines.insert(3, twomid)
             for i in range(0, 2):
                 lines.insert(3, twomid)
                 lines.insert(4, empty_mid)
                 lines.insert(4, empty_mid)
                 lines.insert(4, empty_mid)
-        elif card.number == '7':
+        elif self.number == '7':
             lines.insert(3, twomid)
             lines.insert(4, empty_mid)
             lines.insert(5, middle)
@@ -141,7 +140,7 @@ class Card(object):
             lines.insert(8, empty_mid)
             lines.insert(8, empty_mid)
             lines.insert(len(lines) - 3, twomid)
-        elif card.number == '8':
+        elif self.number == '8':
             lines.insert(3, twomid)
             lines.insert(4, empty_mid)
             lines.insert(5, middle)
@@ -151,7 +150,7 @@ class Card(object):
             lines.insert(9, middle)
             lines.insert(10, empty_mid)
             lines.insert(11, twomid)
-        elif card.number == '9':
+        elif self.number == '9':
             lines.insert(3, twomid)
             lines.insert(4, empty_mid)
             lines.insert(5, empty_mid)
@@ -161,7 +160,7 @@ class Card(object):
             lines.insert(9, empty_mid)
             lines.insert(10, empty_mid)
             lines.insert(11, twomid)
-        elif card.number == '10':
+        elif self.number == '10':
             lines.insert(3, empty_mid)
             lines.insert(4, twomid)
             lines.insert(5, middle)
