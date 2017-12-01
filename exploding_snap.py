@@ -70,6 +70,7 @@ class ExplodingSnap(cmd.Cmd):
 
     def do_scores(self, arg):
         'Show top ten high scores'
+        exploding_snap_util.clear()
         for i in range(len(self.scores) - 1, -1, -1):
             print "{} {}".format(self.scores[i][0], self.scores[i][1])
 
@@ -93,7 +94,7 @@ class ExplodingSnap(cmd.Cmd):
     def play_game(self):
         exploding_snap_util.clear()
         print ""
-        
+
         exploded = False
         while self.lives > 0:
             card_1 = exploding_snap_util.get_random_card()
