@@ -1,6 +1,6 @@
 from utils import exploding_snap_util
 from select import select
-import time
+import random
 import cmd
 import sys
 
@@ -18,7 +18,12 @@ class ExplodingSnap(cmd.Cmd):
     prompt = '(exploding_snap) '
     # Player Initial Values
     lives = 3
-    sleep_time = 2
+    sleep_time = 3
+
+    # String Choices
+    success = ["Bravo!", "Splendid!", "Bloody Brilliant!", "Blimey, you're great!", "Correct!"]
+    error = ["Galloping Gorgons!", "Horrible!", "Troll.", "Merlin's Pants!", "Like a sack of dragon dung.",
+             "Great Sizzling Dragon Bogies!", "Merlin's Beard!", "Dunderhead!", "You snivelling git!"]
 
     game_started = False
 
@@ -47,17 +52,27 @@ class ExplodingSnap(cmd.Cmd):
             card_1 = exploding_snap_util.get_random_card()
             card_2 = exploding_snap_util.get_second_card(card_1)
             exploding_snap_util.print_two_cards(card_1, card_2)
-            self.raw_input_timed()
+            self.raw_input_timed(card_1, card_2)
 
-    def raw_input_timed(self):
+    def raw_input_timed(self, card_1, card_2):
         rlist, _, _ = select([sys.stdin], [], [], self.sleep_time)
         if rlist:
-            s = sys.stdin.readline()
-            print s
+            exploding_snap_util.clear()
+            s = sys.stdin.readline()[0]
+            if s != 'y' and s != 'n':
+                self.lives -= 1
+                print "{} You typed in a wrong character. Remember: only \'y\' and \'n\'\n You have {} {} left"\
+                    .format(random.choice(self.error), self.lives, "life" if self.lives == 1 else "lives")
+            else:
+                if (s == 'y' and card_1.val == card_2.val) or (s == 'n' and card_1.val != card_2.val):
+                    print "{}".format(random.choice(self.success))
+                else:
+                    self.lives -= 1
+                    print"{} You have {} {} left".format(random.choice(self.error), self.lives, "life" if self.lives == 1 else "lives")
         else:
             exploding_snap_util.clear()
             self.lives -= 1
-            print "Not Fast Enough! You have {} {} left".format(self.lives, "life" if self.lives == 1 else "lives")
+            print "{} You have {} {} left".format(random.choice(self.error), self.lives, "life" if self.lives == 1 else "lives")
 
 if __name__ == '__main__':
     ExplodingSnap().cmdloop()
