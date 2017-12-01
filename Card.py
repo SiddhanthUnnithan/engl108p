@@ -10,7 +10,7 @@ class Suits(Enum):
 
 class Card(object):
     def __init__(self, suit, number):
-        self.suit = suit
+        self.suit = suit.value
         self.number = number
         self.val = self.get_val_from_number()
 
