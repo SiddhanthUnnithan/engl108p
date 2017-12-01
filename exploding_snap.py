@@ -1,82 +1,63 @@
-from Card import Card, Suits
-from random import randint, choice
-from datetime import datetime
-import os
+from utils import exploding_snap_util
+from select import select
 import time
-import random
+import cmd
+import sys
 
 # Exploding Snap Rules:
 # Two cards shown at a time
 # Have to type y or n to if they are pairs or not
 # If player is right, add 10 points. otherwise subtract one life
-# Decrease time cards are shown
+# Decrease time cards are shown every time player gets one correct
 # Have probabilities for explosion: 3 lives -> 0, 2 lives -> 25%, 1 life -> 33%
 # Game ends when explosion OR 0 lives
 
-suit_list = list(Suits)
-random.seed(datetime.now())
 
-face_cards = {
-            'J': 11,
-            'Q': 12,
-            'K': 13,
-            'A': 14
-        }
+class ExplodingSnap(cmd.Cmd):
+    intro = exploding_snap_util.intro + "Press Enter or type start to Begin Playing\nType help or ? to list commands\n"
+    prompt = '(exploding_snap) '
+    # Player Initial Values
+    lives = 3
+    sleep_time = 2
 
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    game_started = False
 
+    def emptyline(self):
+        if not self.game_started:
+            self.game_started = True
+            self.start()
 
-def print_two_cards(card1, card2):
-    for a, b in zip(card1.get_ascii_front(), card2.get_ascii_front()):
-        print u'{} {}'.format(a, b)
+    def do_start(self, arg):
+        'Start a new game'
+        self.start()
 
+    def do_exit(self, arg):
+        'Quit the game'
+        print("Thanks for playing!")
+        return True
 
-def get_random_card():
-    """
-    Generates a purely random card from a standard deck using a unique seed
-    :return: Card object
-    """
-    suit = choice(suit_list)
-    rand = randint(2, 14)
-    number = get_number_from_val(rand)
-    return Card(suit, number)
+    def start(self):
+        # Start a new game
+        response = raw_input("Enter your name: ")
+        self.prompt = "({}) ".format(response)
+        self.play_game()
 
+    def play_game(self):
+        while self.lives > 0:
+            card_1 = exploding_snap_util.get_random_card()
+            card_2 = exploding_snap_util.get_second_card(card_1)
+            exploding_snap_util.print_two_cards(card_1, card_2)
+            self.raw_input_timed()
 
-def get_second_card(first_card):
-    """
-    Generates a pseudo-random second card; improves likelihood of two same numbers showing up to 20%
-    :param first_card: Randomly generated first card
-    :return: Card object
-    """
-    possible_cards = []
-    first_val = first_card.val
-    possible_cards.append(first_val)
-    for i in range(0, 3):
-        rand = randint(2, 14)
-        # Ensure only a non-first_val number is inserted, to maintain 20% probability
-        while rand != first_val:
-            possible_cards.append(rand)
-            break
+    def raw_input_timed(self):
+        rlist, _, _ = select([sys.stdin], [], [], self.sleep_time)
+        if rlist:
+            s = sys.stdin.readline()
+            print s
+        else:
+            exploding_snap_util.clear()
+            self.lives -= 1
+            print "Not Fast Enough! You have {} {} left".format(self.lives, "life" if self.lives == 1 else "lives")
 
-    suit = choice(suit_list)
-    number = get_number_from_val(choice(possible_cards))
-    return Card(suit, number)
-
-
-def get_number_from_val(value):
-    number = 2
-    if value < 11:
-        number = str(value)
-    else:
-        for key, val in face_cards.iteritems():
-            if value == val:
-                number = key
-    return number
-
-for i in range(0, 100):
-    c = get_random_card()
-    d = get_second_card(c)
-    print_two_cards(c, d)
-    time.sleep(1)
-    clear()
+if __name__ == '__main__':
+    ExplodingSnap().cmdloop()
