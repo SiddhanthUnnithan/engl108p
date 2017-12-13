@@ -12,7 +12,7 @@ This is a terminal-based game, written in Python, which replicates a subset of t
 
 ### Dependencies
 
-![Docker Logo](dockerlogo.png)
+![Docker Logo](images/dockerlogo.png)
 
 Instantiation of client and game servers requires Docker installation on the machine of use. The same underlying image is used for the game and client servers, with a Python:2.7 base and a standard set of dependencies as detailed in requirements.txt.
 
