@@ -9,6 +9,27 @@ client_url = "http://localhost:8080/%s"
 
 json_headers = {'Content-Type': 'application/json'}
 
+intro2 = """                                         _ __
+        ___                             | '  \\
+   ___  \ /  ___         ,'\_           | .-. \        /|
+   \ /  | |,'__ \  ,'\_  |   \          | | | |      ,' |_   /|
+ _ | |  | |\/  \ \ |   \ | |\_|    _    | |_| |   _ '-. .-',' |_   _
+// | |  | |____| | | |\_|| |__    //    |     | ,'_`. | | '-. .-',' `. ,'\_
+\\\\_| |_,' .-, _  | | |   | |\ \  //    .| |\_/ | / \ || |   | | / |\  \|   \\
+ `-. .-'| |/ / | | | |   | | \ \//     |  |    | | | || |   | | | |_\ || |\_|
+   | |  | || \_| | | |   /_\  \ /      | |`    | | | || |   | | | .---'| |
+   | |  | |\___,_\ /_\ _      //       | |     | \_/ || |   | | | |  /\| |
+   /_\  | |           //_____//       .||`      `._,' | |   | | \ `-' /| |
+        /_\           `------'        \ |   AND        `.\  | |  `._,' /_\\
+                                       \|       THE          `.\\
+                                            ___      __        __   __          __
+                                           |__  \_/ |__) |    /  \ |  \ | |\ | / _`
+                                           |___ / \ |    |___ \__/ |__/ | | \| \__>
+                                                 __   __   ___  __     __   ___      ___
+                                                |__) |__) |__  /__` | |  \ |__  |\ |  |
+                                                |    |  \ |___ .__/ | |__/ |___ | \|  |
+                                                                                         """
+
 welcome_msg = \
 """
 Welcome to Explosive Harry Potter themed President!
@@ -54,6 +75,8 @@ def game_loop():
         'L': lambda _: rq.get(client_url % "last_played")
     }
 
+    print intro2
+
     print welcome_msg
 
     print command_msg
@@ -76,7 +99,7 @@ def game_loop():
             res = simple_commands['G'](None)
 
             # get last played card
-            res = simple_command['L'][None]
+            res = simple_commands['L'](None)
 
             card_index = raw_input("Card index:")
 

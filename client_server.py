@@ -39,6 +39,9 @@ json_headers = {
     'Content-Type': 'application/json'
 }
 
+class Suit:
+    def __init__(self, suitdict):
+        self.value = suitdict['value']
 
 # route for server output - logged to console
 @app.route("/io_route", methods=['POST'])
@@ -61,6 +64,7 @@ def post_hand():
     ascii_hand = []
 
     for card, suit in player_hand:
+        suit = Suit(suit)
         c = Card(suit, card)
         ascii_hand.append((card, c.get_ascii_front()))
 
@@ -85,7 +89,7 @@ def get_hand():
             exploded_card = hand['hand'].pop(card_idx)[0]
 
             ret_val['message'] = \
-                'Oh no - %s exploded from your hand!' % exploded_card
+                "Merlin's beard - %s exploded from your hand!" % exploded_card
 
             ret_val['hand'] = hand['hand']
     
@@ -169,7 +173,7 @@ def send_turn():
 
     if card_idx < 0 or card_idx >= len(hand['hand']):
         ret_val['success'] = False
-        ret_val['message'] = 'Invalid card specified. Please try again'
+        ret_val['message'] = 'Dung brains! Invalid card played. Please try again.'
 
         return jsonify(ret_val)
 
@@ -181,7 +185,7 @@ def send_turn():
         exploded_card = hand['hand'].pop(card_idx)
         ret_val['success'] = True
         ret_val['message'] = \
-            'Oh no - %s exploded from your hand! Your turn is done.' \
+            'Gallopin Gorgons - %s exploded from your hand! Your turn is done.' \
                 % exploded_card[0]
 
         # invoke end of turn

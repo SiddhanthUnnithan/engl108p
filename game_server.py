@@ -38,7 +38,8 @@ card_order = [str(num) for num in range(3,11)] + ['J', 'Q', 'K', 'A', '2']
 # testing
 # card_order = card_order[:3]
 
-suits = [Suits.DIAMONDS, Suits.SPADES, Suits.CLUBS, Suits.HEARTS]
+# suits = [Suits.DIAMONDS, Suits.SPADES, Suits.CLUBS, Suits.HEARTS]
+suits = [{'value': s.value} for s in list(Suits)]
 card_deck = sum([zip([val]*4, suits) for val in card_order], [])
 
 
@@ -51,7 +52,7 @@ def join_game():
 
     if close_game['status']:
         ret_val['message'] = \
-            'Game is closed. Check with guardian about next round.'
+            'The current game is closed. Please check with the guardian about the next round.'
 
         return jsonify(ret_val)
 
@@ -62,13 +63,13 @@ def join_game():
 
     if client_id in valid_clients:
         ret_val['message'] = \
-            'Already joined. Please wait for futher instructions.'
+            'You have already joined. Please wait for futher instructions from the guardian.'
         
         return jsonify(ret_val)
 
     valid_clients.append(client_id)
 
-    ret_val['message'] = 'Successfully joined game. Status: OPEN.'
+    ret_val['message'] = 'Oy! You have joined the game successfully.'
 
     return jsonify(ret_val)
 
@@ -80,7 +81,7 @@ def all_clients():
 
     # send game open message to all clients
     game_open_msg = {
-        'message': 'All clients joined. Please await guardian instructions.'
+        'message': 'All players joined. Please await guardian instructions.'
     }
     
     for client_id in valid_clients:
@@ -127,7 +128,7 @@ def all_clients():
     init_client = cq.peek()
 
     game_start_msg = {
-        "message": "Start Game! Follow the instructions on the interface."
+        "message": "Get a shifty on - it's your turn!"
     }
 
     rq.post("http://%s:8080/io_route" % init_client, 
@@ -153,7 +154,8 @@ def send_turn():
 
     if client_id != cq.peek():
         ret_val['success'] = False
-        ret_val['message'] = 'It is not your turn. Please await a message to play.'
+        ret_val['message'] = \
+            'Hold your hippogrifs! It is not your turn.'
 
         return jsonify(ret_val)
 
@@ -165,7 +167,7 @@ def send_turn():
         game_state['recently_played'] = played_card
         
         ret_val['success'] = True
-        ret_val['message'] = 'Valid card played. Ending turn.'
+        ret_val['message'] = 'Valid play mate. Your turn has ended.'
 
         broadcast = {
             'message': '%s played a %s.' % (client_id, played_card)
@@ -185,7 +187,7 @@ def send_turn():
         next_client = cq.peek()
 
         payload = {
-            'message': 'It is your turn.'
+            'message': "Get a shifty on - it's your turn!"
         }
 
         rq.post("http://%s:8080/io_route" % next_client, 
@@ -199,7 +201,7 @@ def send_turn():
     if played_card_idx < prev_card_idx:
         # invalid card played, invoke a retry
         ret_val['success'] = False
-        ret_val['message'] = 'Invalid card played. Prompting a retry.'
+        ret_val['message'] = 'Dung brains! Invalid card played. Prompting a retry.'
         ret_val['retry'] = True
     # valid card chosen - burn invoked
     elif played_card == game_state['recently_played']:
@@ -245,7 +247,7 @@ def send_turn():
         cq.dq()
 
         ret_val['success'] = True
-        ret_val['message'] = 'Valid card played. Your turn has ended.'
+        ret_val['message'] = 'Valid play mate. Your turn has ended.'
 
         # alter game state
         game_state['recently_played'] = played_card
@@ -280,7 +282,7 @@ def end_turn():
     if data['identifier'] != cq.peek():
         ret_val['success'] = False
         ret_val['message'] = \
-            'It is not your turn. Please await a message to play.'
+            'Hold your hippogrifs! It is not your turn.'
 
         return jsonify(ret_val)
 
@@ -294,7 +296,7 @@ def end_turn():
     client_id = cq.peek()
 
     payload = {
-        'message': 'It is your turn.'
+        'message': "Get a shifty on - it's your turn!"
     }
 
     rq.post("http://%s:8080/io_route" % client_id, data=json.dumps(payload),
@@ -319,7 +321,7 @@ def end_game():
     # check that client invoking is the one with the turn
     if data['identifier'] != cq.peek():
         ret_val['message'] = \
-            "It is not your turn. Please await a message to play."
+            'Hold your hippogrifs! It is not your turn.'
 
         return jsonify(ret_val)
 

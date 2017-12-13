@@ -1,5 +1,16 @@
-# engl108p
-HP-themed President with Exploding Snap cards.
+# Assignment C - engl108p
+
+## Authors: Ramandeep Farmaha, Siddhanth Unnithan
+
+## HP-themed Exploding Snap.
+
+## HP-themed President with Exploding Snap cards
+
+[![Interface Capture]] (images/hp_pres_intro_cap.png)
+
+This game replicates a subset of the original President card-game, allowing single-card plays and burns. The language used in the game messaging and client interface, makes use of Harry Potter-style wordplay. The current game configuration supports multiplayer play on a single machine. It is recommended that each player receives their own terminal instance and that each instance is displayed on its own screen, disallowing players from seeing each other's hands.
+
+### Dependencies
 
 Instead of introducing the complexity of a persistent socket connection and dealing with multiple clients, we can instantiate a single  game server and multiple client 'servers' that send HTTP requests to the game server, which is monitored by a game guardian (someone that facilitates start/end of the game).
 
