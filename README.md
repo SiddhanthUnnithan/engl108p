@@ -1,64 +1,50 @@
 # Assignment C - engl108p
 
-## Authors: Ramandeep Farmaha, Siddhanth Unnithan
+Authors: Ramandeep Farmaha, Siddhanth Unnithan
 
 ## HP-themed Exploding Snap.
 
 ## HP-themed President with Exploding Snap cards
 
-[![Interface Capture]] (images/hp_pres_intro_cap.png)
+![Interface Capture](images/hp_pres_intro_cap.png)
 
-This game replicates a subset of the original President card-game, allowing single-card plays and burns. The language used in the game messaging and client interface, makes use of Harry Potter-style wordplay. The current game configuration supports multiplayer play on a single machine. It is recommended that each player receives their own terminal instance and that each instance is displayed on its own screen, disallowing players from seeing each other's hands.
+This is a terminal-based game, written in Python, which replicates a subset of the original President card-game mechanics, allowing single-card plays and burns. The language used in the game messaging and client interface, makes use of Harry Potter-style wordplay. The current game configuration supports multiplayer play on a single machine. It is recommended that each player receives their own terminal instance and that each instance is displayed on its own screen, disallowing players from seeing each other's hands.
 
 ### Dependencies
 
-Instead of introducing the complexity of a persistent socket connection and dealing with multiple clients, we can instantiate a single  game server and multiple client 'servers' that send HTTP requests to the game server, which is monitored by a game guardian (someone that facilitates start/end of the game).
+![Docker Logo](dockerlogo.png)
 
-## Game Server
-- Flask
-- Global Variables
-    - valid clients
-        - maps client name to _secret_ key identifier
-    - turns (cyclical queue)
-        - initial random generation
-    - current game state (last observed card)
-        - nature of this data structure is dependent on the game mechanics (e.g. might want to store last three cards for President runs)
-- Routes
-    - JOIN
-        - returns client identifier
-    - ALL CLIENTS JOINED
-        - sent by *guardian*
-        - sends notifications to all clients
-    - SEND TURN
-        - initiated from interface, sent through client server
-    - GET CURRENT GAME state 
-    - QUIT
-        - delete all game state
+Instantiation of client and game servers requires Docker installation on the machine of use. The same underlying image is used for the game and client servers, with a Python:2.7 base and a standard set of dependencies as detailed in requirements.txt.
 
-## Guardian Client
-- Assumption: all clients are running on the same machine
-    - Instantiates 'x' docker containers corresponding to each client
-    - Provides unique incrementing identifier for each client container
+### Setup
 
-## Client Interface
-- Persistent I/O stream which a user interacts with via the terminal
-- Key-based commands
+The current version of the game has been setup with hard-coded server 'hostname' values, corresponding to Docker containers within one network. Configuration of the docker network and containers, can be found in start-dev.sh.
 
-## Client Server
-- Proxy which stores client state
-- Sends requests to game server depending on client interface _request_
-- No requests made from external _machines_
-- Global Variables
-    - Client hand
-    - Client identifier
-- Routes
-    - SEND TURN
-        - strictly used for forwarding to the game server
-        - randomly determines whether a card should explode prior to it being sent
-            - if card explodes; end turn but don't alter turn queue
-    - GET HAND
-        - returns current client hand
-        - randomly determines whether a card should explode from the hand before being returned
-            - randomly selected card across the entire hand
-        - order of the cards is fixed
-        - only applicable to games
+Instantiating the network and underlying containers is as simple as: `bash start-dev.sh`.
+
+If you would like to spin up more than two client servers, modify start-dev.sh. Use the following snippet of code to add a new client container to the mix:
+
+```bash
+# < > tags refer to templates that you would use to substitute your own values with
+
+docker run -d -it -v $PWD:/App -e CLIENT_HOSTNAME=<client_name> -e GAME_SERVER_HOSTNAME=game-server -e DEV_FLAG=true --name <client_name> --network game-network game-client
+```
+
+Once the appropriate containers are up and running (check via `docker ps`), you must start the game and client servers. Note that the game server must be started before the client as the client, upon instantiation, will poll the game server in an attempt to join.
+
+The game and client servers can be instantiated via `bash start-gs.sh` and `bash start-client.sh <client_name>`, respectively. Note that the client_name, specified as an argument to the start-client.sh script, must correspond to the client_name value provided in start-dev.sh. Instantiation of the clientz server will result in a persistent output channel that is used to transmit messages to the players; this should not be closed.
+
+Once the game and client servers are instantiated, the _guardian_ (i.e. individual overseeing the game) must notify the game server that all of the clients have joined. This can be done via: `bash all-clients.sh`.
+
+Each client is now expected to interact with the game server via a designated interface. It is recommended that two terminal sessions are kept side-by-side to reflect the client server output channel and the client interface. The interface can be instantiated with the following command: `bash start-interface.sh <client_name>`. Similar to the client server, the argument to the start-interface.sh script mut correspond to the client_name value provided in start-dev.sh.
+
+The following GIF depicts the instantiation of each server and the interfaces, under the assumption the game and client docker containers are already running.
+
+### Game commands
+
+### Future Work
+Brief notes regarding the technical details of the technical implementation can be found in notes.txt.
+
+- multiplayer support across multiple machines
+- game server deployment (Heroku, AWS)
+- env-variable based client and game configuration
