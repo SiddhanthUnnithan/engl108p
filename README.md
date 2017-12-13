@@ -2,7 +2,7 @@
 
 Authors: Ramandeep Farmaha, Siddhanth Unnithan
 
-## HP-themed Exploding Snap.
+## HP-themed Exploding Snap
 
 ## HP-themed President with Exploding Snap cards
 
@@ -38,18 +38,15 @@ Once the game and client servers are instantiated, the _guardian_ (i.e. individu
 
 Each client is now expected to interact with the game server via a designated interface. It is recommended that two terminal sessions are kept side-by-side to reflect the client server output channel and the client interface. The interface can be instantiated with the following command: `bash start-interface.sh <client_name>`. Similar to the client server, the argument to the start-interface.sh script mut correspond to the client_name value provided in start-dev.sh.
 
-### Screen Capture
+### Game GIFs
 
 #### Server Instantiation
 
 https://gfycat.com/ScrawnyFrigidBuckeyebutterfly
 
-#### Get Hand
+#### Game Dynamics
 
-![Get Hand Gif](https://media.giphy.com/media/xUNd9Ad7fRuKo4LfqM/giphy.gif)
-
-#### Play Card
-
+https://gfycat.com/MajorDelightfulAntlion
 
 ### Future Work
 Brief notes regarding the technical details of the technical implementation can be found in notes.txt.
