@@ -38,9 +38,18 @@ Once the game and client servers are instantiated, the _guardian_ (i.e. individu
 
 Each client is now expected to interact with the game server via a designated interface. It is recommended that two terminal sessions are kept side-by-side to reflect the client server output channel and the client interface. The interface can be instantiated with the following command: `bash start-interface.sh <client_name>`. Similar to the client server, the argument to the start-interface.sh script mut correspond to the client_name value provided in start-dev.sh.
 
-The following GIF depicts the instantiation of each server and the interfaces, under the assumption the game and client docker containers are already running.
+### Screen Capture
 
-### Game commands
+#### Server Instantiation
+
+https://gfycat.com/ScrawnyFrigidBuckeyebutterfly
+
+#### Get Hand
+
+![Get Hand Gif](https://media.giphy.com/media/xUNd9Ad7fRuKo4LfqM/giphy.gif)
+
+#### Play Card
+
 
 ### Future Work
 Brief notes regarding the technical details of the technical implementation can be found in notes.txt.
