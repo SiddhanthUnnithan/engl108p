@@ -3,6 +3,37 @@
 Authors: Ramandeep Farmaha, Siddhanth Unnithan
 
 ## HP-themed Exploding Snap
+![Interface Capture](images/exploding_snap.jpeg)
+
+This is a terminal-based game, written in Python, that mimics the traditional card game of Snap, augmented for single player gameplay, with some additional "magical" elements.
+
+### Setup
+
+Ensure that you have Python:2.7 and PyPi package manager installed on your system. To verify if you have Python, type python --version in the console. To verify you have PyPi, type pip --version in the console.
+
+Install the game requirements by typing: 
+
+`pip install -r requirements.txt`
+
+### How to Play
+
+Run the game by entering: 
+
+`python exploding_snap.py`
+
+### Game Rules
+
+- Two cards are shown at a time
+- Type y if the cards are pairs, or n if they aren't
+- You earn a point for every correct answer. But be careful, you lose a life if you're wrong!
+- Every time you get a point, you have less time to solve the next pair
+- The more lives you lose, the more likely the cards might explode!
+- The game's over when you lose all your lives or if the cards explode
+
+### Gameplay GIFs
+
+![Alt Text](images/exploding_snap.gif)
+
 
 ## HP-themed President with Exploding Snap cards
 
@@ -38,7 +69,7 @@ Once the game and client servers are instantiated, the _guardian_ (i.e. individu
 
 Each client is now expected to interact with the game server via a designated interface. It is recommended that two terminal sessions are kept side-by-side to reflect the client server output channel and the client interface. The interface can be instantiated with the following command: `bash start-interface.sh <client_name>`. Similar to the client server, the argument to the start-interface.sh script mut correspond to the client_name value provided in start-dev.sh.
 
-### Game GIFs
+### Gameplay GIFs
 
 #### Server Instantiation
 
